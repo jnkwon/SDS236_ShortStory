@@ -102,26 +102,21 @@ average_savings <- combined_2 %>%
   summarize(average_saving = mean(savings),
             average_used = mean(average_price),
             average_new = mean(new_price))
-kable(average_savings, col.names = c("Average Saving", "Average Used Car Price", "Average New Car Price"))
+kable(average_savings, col.names = c("Average Saving", "Average Used Car Price", "Average New Car Price"), caption = "Average Savings and Prices")
 ```
 
-```{r, message=FALSE, echo=FALSE}
-# Combined Data for all cars
-kable(combined_2, col.names = c("Car",
-                           "# of Listings (Craiglist)",
-                           "Avg Used Car",
-                           "New Car",
-                           "Savings",
-                           "Saving More Than Used Price?"))
-```
+This analysis covers the top 5 cars for recent graduates based on U.S. World & News Report’s (U.S. News) article “15 Best Cars for Recent Graduates in 2019.” ^[ U.S. World & News Report. “15 Best Cars for Recent Graduates in 2019.” https://cars.usnews.com/cars-trucks/best-new-cars-for-recent-college-grads]  The top 5 cars are the Honda Fit, Mini Cooper, Honda CR-V, Kia Forte, and Mazda3. According to U.S. News, they “evaluated the top models for cargo space, safety features, fuel economy, and cabin quality” among other characteristics. They have also focused on affordable cars. 
+
+For each of the five cars, the 2019 new price as well as the average used price were collected. The new price was extracted directly from U.S. News’ article. The used prices were scraped from Craigslist. 
+
 
 ```{r, message=FALSE, echo=FALSE}
 used_prices <- ggplot(combined_2, aes(car, average_price)) +
   geom_col(fill="darkred") + 
   geom_text(aes(label = average_price), size=3, vjust = -0.5) +
-  labs(title = "Average Price of Used Cars (Craiglist Listings in Western Mass)",
+  labs(title = "Average Price of Used Cars (Craigslist Listings in Western Mass)",
        subtitle = "Top 5 Cars for Recent Graduates",
-       caption = "source: Craiglist Listings in Western Massachusetts",
+       caption = "source: Craigslist Listings in Western Massachusetts",
        x ="Car Brand and Make",
        y = "Average Price (in Dollars)") +
   ylim(0, 30000)
@@ -142,6 +137,78 @@ new_prices <- ggplot(combined_2, aes(car, new_price)) +
           
 new_prices
 ```
+
+For each vehicle, all the Craigslist listings that appeared from the search of each car model were included in the analysis; this includes suggested listings from nearby locations. The nearby location listings were included as vehicles tend to be large purchases, which leads to the geographic market to cover a larger radius for most purchasers. 
+
+In addition, the prices scraped from Craigslist were not always reliable. Some analysis showed that some prices were listed as \$0 and asked interested parties to call for more information. None of the prices were excluded from this analysis; therefore, the \$0 listings could have skewed the average prices. However, the same analysis also showed that some listings had significantly higher prices than the average price. Below is the minimum and maximum analysis data as well as the summary of all the data used. 
+
+
+```{r, message=FALSE, echo=FALSE}
+minmax_fit <- honda_fit %>% 
+  summarize(
+    car = "Honda Fit",
+    min_price = min(price),
+    max_price = max(price),
+    average_price = mean(price)
+  )
+
+minmax_cooper <- mini_cooper %>% 
+  summarize(
+    car = "Mini Cooper",
+    min_price = min(price),
+    max_price = max(price),
+    average_price = mean(price)
+  )
+
+minmax_crv <- honda_crv %>% 
+  summarize(
+    car = "Honda CR-V",
+    min_price = min(price),
+    max_price = max(price),
+    average_price = mean(price)
+  )
+
+minmax_forte<- kia_forte %>% 
+  summarize(
+    car = "Kia Forte",
+    min_price = min(price),
+    max_price = max(price),
+    average_price = mean(price)
+  )
+
+minmax_mazda<- mazda3 %>% 
+  summarize(
+    car = "Mazda3",
+    min_price = min(price),
+    max_price = max(price),
+    average_price = mean(price)
+  )
+
+
+combined_minmax <- rbind(minmax_fit, minmax_cooper, minmax_crv, minmax_forte, minmax_mazda)
+
+combined_minmax$min_price<- currency(combined_minmax$min_price, digits = 0L)
+combined_minmax$max_price<- currency(combined_minmax$max_price, digits = 0L)
+combined_minmax$average_price<- currency(combined_minmax$average_price, digits = 0L)
+
+kable(combined_minmax, col.names = c("Car", "Cheapest", "Most Expensve", "Average"), caption ="Min/Max Prices for Each Car Model (Used)")
+
+```
+
+
+```{r, message=FALSE, echo=FALSE}
+# Combined Data for all cars
+kable(combined_2, col.names = c("Car",
+                           "# of Listings (Craigslist)",
+                           "Avg Used Car",
+                           "New Car",
+                           "Savings",
+                           "Saving More Than Used Price?"),
+      caption = "Summary of All Data for Each Car Model")
+```
+
+Table 3 shows that the average price for a used car is significantly cheaper than for a new car for all the top 5 cars for recent graduates. Savings from purchasing a used car range from $10,000 to almost $16,000. For new graduates, this amount of money can make a big difference for their financial health as they start their new stage in life. The second column shows the number of listings available on Craigslist for each model. This is important as it shows that graduates have many options just in Western Massachusetts. The last column in Table 3 shows whether the amount in savings is actually greater than the average price of a used car, which means that graduates could potentially buy two used cars for the price of one new car. 
+
 ```{r, message=FALSE, echo=FALSE}
 savings_usd <- ggplot(combined_2, aes(car, savings)) +
   geom_col(fill="darkgreen") + 
@@ -153,6 +220,11 @@ savings_usd <- ggplot(combined_2, aes(car, savings)) +
                     ylim(0,30000)
 savings_usd
 ```
+Although buying a used car can save new graduates thousands of dollars, it is also important to note that used cars require more research in the buying process, might not be as reliable, and will probably incur more maintenance costs. New graduates should make sure that they purchase their used cars from a reliable source and get the appropriate car checks before purchase. Furthermore, although this analysis did not focus on the age of used cars, graduates have further flexibility price options depending on the age of the used car.  
+
+When calculating post-graduation moving costs, new graduates should strongly consider purchasing a used car to save $12,498 on average. Having an extra thousands of dollars or not having more debt from a car loan can help new graduates build a stronger financial foundation. 
+
+The data and code behind this analysis can be found here: https://github.com/jnkwon/SDS236_ShortStory 
 
 
 
