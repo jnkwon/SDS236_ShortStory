@@ -1,0 +1,159 @@
+---
+title: "The Best Cars for New Graduates: Should You Buy a New Car?"
+author: "Jeny Kwon"
+date: "2/17/2020"
+output: pdf_document
+---
+
+```{r, message=FALSE, echo=FALSE}
+library(googlesheets4)
+library(tidyverse)
+library(dplyr)
+library(knitr)
+library(data.table)
+library(formattable)
+library(stringr)
+sheets_deauth()
+```
+
+```{r, message=FALSE, echo=FALSE}
+honda_fit <- read_sheet("1DBUS0kb9dB0d30toeG6FcGUzsCCMVrPr7lp7dRnyd28")
+mini_cooper <- read_sheet("1DBUS0kb9dB0d30toeG6FcGUzsCCMVrPr7lp7dRnyd28", sheet = 2)
+
+honda_crv <- read_sheet("1DBUS0kb9dB0d30toeG6FcGUzsCCMVrPr7lp7dRnyd28", sheet = 3)
+
+kia_forte <- read_sheet("1DBUS0kb9dB0d30toeG6FcGUzsCCMVrPr7lp7dRnyd28", sheet = 4)
+
+mazda3 <- read_sheet("1DBUS0kb9dB0d30toeG6FcGUzsCCMVrPr7lp7dRnyd28", sheet = 5)
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Summary for Honda Fit
+summary_fit <- honda_fit %>% 
+  summarize(
+    car = "Honda Fit",
+    number_of_listings = n(),
+    average_price = round(mean(price), digits = 2),
+    new_price = 16190,
+    savings = round(new_price-mean(price), digits = 2)
+  )
+
+# Summary for Mini Cooper
+summary_cooper <- mini_cooper %>% 
+  summarize(
+    car = "Mini Cooper",
+    number_of_listings = n(),
+    average_price = round(mean(price), digits = 2),
+    new_price = 21900,
+    savings = round(new_price-mean(price), digits = 2)
+  )
+
+# Summary for Honda CR-V
+summary_crv <- honda_crv %>% 
+  summarize(
+    car = "Honda CR-V",
+    number_of_listings = n(),
+    average_price = round(mean(price), digits = 2),
+    new_price = 24350,
+    savings = round(new_price-mean(price), digits = 2), 
+  )
+
+#Summary for Kia Forte
+summary_forte <- kia_forte %>% 
+  summarize(
+    car = "Kia Forte",
+    number_of_listings = n(),
+    average_price = round(mean(price), digits = 2),
+    new_price = 17790,
+    savings = round(new_price-mean(price), digits = 2)
+  )
+
+# Summary for Mazda3
+summary_mazda <- mazda3 %>% 
+  summarize(
+    car = "Mazda3",
+    number_of_listings = n(),
+    average_price = round(mean(price), digits = 2),
+    new_price = 21000,
+    savings = round(new_price-mean(price), digits = 2)
+  )
+```
+
+As graduation season approaches, many college seniors are looking to start their new jobs in new cities, but how much does it cost to start life after college? 
+
+There are many expenses that come with relocating to a new city. Expenses include moving costs, storage fees, apartment deposits- which usually consist of security deposit, brokerage fee, first and last months’ rent, and cars. 
+
+Often times, most of these expenses are inevitable, and prices are set by the market. Have furniture you want to move? The fees from moving companies around your area are most likely around the same price. Decided to store furniture until you find an apartment? Most storage facilities have similar rates. Cannot live with your parents? You are going to need to find a new apartment, and although some do not require brokerage fees, you are still bound to market rates for rent.  All these expenses add up quickly and are apparent to soon-to-be graduates. However, graduates can save a significant amount of money by simply buying used cars. 
+
+It turns out that a new graduate can save \$12,464 on average by purchasing a used car instead of a new car after finishing school. This savings amount is actually also greater than the price of an average used car, which is \$7,749. 
+
+```{r, message=FALSE, echo=FALSE}
+combined <- rbind(summary_fit, summary_cooper, summary_crv, summary_forte, summary_mazda)
+
+combined_2 <- combined %>% 
+  data.frame() %>% 
+  mutate(greater_savings = ifelse(savings > average_price, "yes", "no"))
+
+combined_2$average_price <- currency(combined_2$average_price, digits = 0L)
+combined_2$new_price <- currency(combined_2$new_price, digits = 0L)
+combined_2$savings <- currency(combined_2$savings, digits = 0L)
+
+average_savings <- combined_2 %>% 
+  summarize(average_saving = mean(savings),
+            average_used = mean(average_price),
+            average_new = mean(new_price))
+kable(average_savings, col.names = c("Average Saving", "Average Used Car Price", "Average New Car Price"))
+```
+
+```{r, message=FALSE, echo=FALSE}
+# Combined Data for all cars
+kable(combined_2, col.names = c("Car",
+                           "# of Listings (Craiglist)",
+                           "Avg Used Car",
+                           "New Car",
+                           "Savings",
+                           "Saving More Than Used Price?"))
+```
+
+```{r, message=FALSE, echo=FALSE}
+used_prices <- ggplot(combined_2, aes(car, average_price)) +
+  geom_col(fill="darkred") + 
+  geom_text(aes(label = average_price), size=3, vjust = -0.5) +
+  labs(title = "Average Price of Used Cars (Craiglist Listings in Western Mass)",
+       subtitle = "Top 5 Cars for Recent Graduates",
+       caption = "source: Craiglist Listings in Western Massachusetts",
+       x ="Car Brand and Make",
+       y = "Average Price (in Dollars)") +
+  ylim(0, 30000)
+used_prices
+```
+
+```{r, message=FALSE, echo=FALSE}
+new_prices <- ggplot(combined_2, aes(car, new_price)) +
+  geom_col(fill="dodgerblue4") + 
+  geom_text(aes(label = new_price), size=3, vjust = -0.5) +
+  labs(title = "Average Price of New Cars",
+       subtitle = "Top 5 Cars for Recent Graduates",
+       caption = "source: USNews 15 Best Cars for Recent Graduates in 2019 ",
+       x ="Car Brand and Make (2019 Models)",
+       y = "Price (in USD)") +
+  ylim(0,30000)
+
+          
+new_prices
+```
+```{r, message=FALSE, echo=FALSE}
+savings_usd <- ggplot(combined_2, aes(car, savings)) +
+  geom_col(fill="darkgreen") + 
+  geom_text(aes(label = savings), size=3, vjust = -0.5) +
+  labs(title = "Amount in Savings from Buying a Used Car",
+                    subtitle = "Top 5 Cars for Recent Graduates",
+                    x ="Car Brand and Make",
+                    y = "Average Savings (in USD)") +
+                    ylim(0,30000)
+savings_usd
+```
+
+
+
+
